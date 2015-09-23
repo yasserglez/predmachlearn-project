@@ -12,17 +12,37 @@ Additional information is available at http://groupware.les.inf.puc-rio.br/har.
 # R Package Loading
 
 ```{r}
+library("readr")
 library("dplyr", warn.conflicts = FALSE)
 ```
 
 # Loading and Tidying the Data
 
-```{r}
-training_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
-training_csv <- "pml-training.csv"
-if (!file.exists(training_csv)) {
-    download.file(training_url, training_csv, method = "curl")
+```{r warning = FALSE}
+dataset_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+dataset_csv <- "pml-training.csv"
+if (!file.exists(dataset_csv)) {
+    download.file(dataset_url, dataset_csv, method = "curl")
 }
+dataset <- read_csv(dataset_csv)
+```
+
+```{r}
+sensors <- c("forearm", "arm", "belt", "dumbbell")
+vars <- c("roll_%s", "pitch_%s", "yaw_%s",
+          "gyros_%s_x", "gyros_%s_y", "gyros_%s_z",
+          "accel_%s_x", "accel_%s_y", "accel_%s_z",
+          "magnet_%s_x", "magnet_%s_y", "magnet_%s_z")
+features <- unlist(lapply(sensors, 
+      function (sensor) lapply(vars, 
+               function (var) sprintf(var, sensor))))
+```
+
+```{r}
+dataset <- dataset %>%
+    filter(new_window == "yes") %>%
+    select(one_of(c("classe", features))) %>%
+    mutate(classe = as.factor(classe))
 ```
 
 # Exploratory Data Analysis
@@ -33,12 +53,15 @@ if (!file.exists(training_csv)) {
 
 # Appendix
 
-## Results on the Test Data
+## Results on the Testing Portion of the Data
 
 ```{r}
-testing_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
-testing_csv <- "pml-testing.csv"
-if (!file.exists(testing_csv)) {
-    download.file(testing_url, testing_csv, method = "curl")
+testing_dataset_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+testing_dataset_csv <- "pml-testing.csv"
+if (!file.exists(testing_dataset_csv)) {
+    download.file(testing_dataset_url, testing_dataset_csv, method = "curl")
 }
+
+testing_dataset <- read_csv(testing_dataset_csv) %>%
+    select(one_of(c("problem_id", features)))
 ```
