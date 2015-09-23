@@ -1,0 +1,44 @@
+---
+title: "Practical Machine Learning: Prediction Assignment"
+author: "Yasser Gonzalez"
+date: "September 2015"
+output: html_document
+---
+
+# Introduction
+
+Additional information is available at http://groupware.les.inf.puc-rio.br/har.
+
+# R Package Loading
+
+```{r}
+library("dplyr", warn.conflicts = FALSE)
+```
+
+# Loading and Tidying the Data
+
+```{r}
+training_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+training_csv <- "pml-training.csv"
+if (!file.exists(training_csv)) {
+    download.file(training_url, training_csv, method = "curl")
+}
+```
+
+# Exploratory Data Analysis
+
+# Building the Prediction Model
+
+# Conclusions
+
+# Appendix
+
+## Results on the Test Data
+
+```{r}
+testing_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+testing_csv <- "pml-testing.csv"
+if (!file.exists(testing_csv)) {
+    download.file(testing_url, testing_csv, method = "curl")
+}
+```
