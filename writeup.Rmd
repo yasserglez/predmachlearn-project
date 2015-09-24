@@ -1,24 +1,52 @@
 ---
 title: "Practical Machine Learning: Prediction Assignment"
-author: "Yasser Gonzalez"
+author: "Yasser Gonzalez -- http://yassergonzalez.com"
 date: "September 2015"
 output: html_document
 ---
 
 # Introduction
 
-Additional information is available at http://groupware.les.inf.puc-rio.br/har.
+The goal of this assignment is to build a prediction model capable of
+identifying if a subject is performing a specific weight lifting
+exercise correctly.
+
+A data set is available with information collected from six subjects
+who were asked to perform 10 repetitions of dumbbell lifts in five
+different settings:
+
+1.   exactly according to the specification (class `A`),
+2.   throwing the elbows to the front (class `B`),
+3.   lifting the dumbbell only halfway (class `C`),
+4.   lowering the dumbbell only halfway (class `D`), and
+5.   throwing the hips to the front (class `E`).
+
+The model's input consists of a number of sensors attached to the body
+of the subject: accelerometers on the belt, forearm, arm, and dumbell.
+Using this information, the model must provide a decision about the
+correctness of the exercise execution according to one of the five
+categories specified above.
+
+Additional information about the experimental setup and the data set
+is available at http://groupware.les.inf.puc-rio.br/har and in the
+following publication:
+
+> Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H.
+> [Qualitative Activity Recognition of Weight Lifting Exercises. ](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201)
+> *4th International Conference in Cooperation with SIGCHI (Augmented Human '13)*.
+> Stuttgart, Germany: ACM SIGCHI, 2013.
 
 # Initialization
 
-The following code fragment loads the required R packages and sets the random 
-seed to ease the reproducibility of the results.
+The following code fragment loads the required R packages and sets the
+random seed to ease the reproducibility of the results.
 
 ```{r results='hide', message=FALSE, warning=FALSE}
 library("readr")
 library("dplyr")
-library("randomForest")
+library("ggplot2")
 library("caret")
+library("randomForest")
 library("doMC")
 
 set.seed(2100479551)
@@ -41,8 +69,8 @@ vars <- c("roll_%s", "pitch_%s", "yaw_%s",
           "gyros_%s_x", "gyros_%s_y", "gyros_%s_z",
           "accel_%s_x", "accel_%s_y", "accel_%s_z",
           "magnet_%s_x", "magnet_%s_y", "magnet_%s_z")
-features <- unlist(lapply(sensors, 
-      function (sensor) lapply(vars, 
+features <- unlist(lapply(sensors,
+      function (sensor) lapply(vars,
                function (var) sprintf(var, sensor))))
 ```
 
@@ -69,7 +97,7 @@ testing_data <- dataset[-indices, ]
 model_file <- "model.rds"
 if (!file.exists(model_file)) {
     registerDoMC(cores = 4)
-    model <- train(classe ~ ., data = training_data,  
+    model <- train(classe ~ ., data = training_data,
                    method = "rf",
                    tuneLength = 8, # number of mtry values
                    metric = "Accuracy",
@@ -83,7 +111,7 @@ if (!file.exists(model_file)) {
 # Evaluating the Prediction Model
 
 ```{r}
-confusionMatrix(predict(model, newdata = testing_data), 
+confusionMatrix(predict(model, newdata = testing_data),
                 testing_data$classe)
 ```
 
@@ -108,7 +136,7 @@ prediction
 ```{r}
 for (i in seq(along = prediction)) {
     txt_file <- paste0("problem_id_", testing_dataset$problem_id[i], ".txt")
-    write.table(prediction[i], file = txt_file, 
+    write.table(prediction[i], file = txt_file,
                 quote = FALSE, row.names = FALSE, col.names = FALSE)
 }
 ```
