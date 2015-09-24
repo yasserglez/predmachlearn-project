@@ -22,10 +22,10 @@ different settings:
 5.   throwing the hips to the front (class `E`).
 
 The model's input consists of a number of sensors attached to the body
-of the subject: accelerometers on the belt, forearm, arm, and dumbell.
-Using this information, the model must provide a decision about the
-correctness of the exercise execution according to one of the five
-categories specified above.
+of the subject: on the belt, forearm, arm, and dumbell. Using this
+information, the model must provide a decision about the correctness
+of the exercise execution according to one of the five categories
+specified above.
 
 Additional information about the experimental setup and the data set
 is available at http://groupware.les.inf.puc-rio.br/har and in the
@@ -54,6 +54,8 @@ set.seed(2100479551)
 
 # Data Loading and Feature Selection
 
+First, the data set is downloaded and loaded into R.
+
 ```{r warning = FALSE}
 dataset_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 dataset_csv <- "pml-training.csv"
@@ -62,6 +64,16 @@ if (!file.exists(dataset_csv)) {
 }
 dataset <- read_csv(dataset_csv)
 ```
+
+In addition to the different readings from the sensors, the data set
+includes a number of engineered features (such as mean and standard
+deviation of the sensor readings computed over a certain sliding time
+window), but for this assignment I have decided to work with the
+original sensor readings and expand the set of features later if
+deemed necessary. Therefore, the selected features correspond to the
+Euler angles (roll, pitch and yaw), and the 3-axis coordinates of the
+accelerometer, gyroscope and magnetometer readings for each one of the
+four sensors.
 
 ```{r}
 sensors <- c("forearm", "arm", "belt", "dumbbell")
@@ -72,13 +84,19 @@ vars <- c("roll_%s", "pitch_%s", "yaw_%s",
 features <- unlist(lapply(sensors,
       function (sensor) lapply(vars,
                function (var) sprintf(var, sensor))))
-```
 
-```{r}
 dataset <- dataset %>%
     select(one_of(c("classe", features))) %>%
     mutate(classe = as.factor(classe))
 ```
+
+There are `r nrow(dataset)` observations of the `r length(features)`
+features in the data set.
+
+Before continuing, the data set is divided in two parts: 80% of the
+available samples will be used to train the prediction model and the
+remaining 20% for testing. The testing portion of the data set will be
+used to estimate the out-of-sample error of the prediction model.
 
 ```{r}
 indices <- createDataPartition(dataset$classe, p = 0.8, list = FALSE)
@@ -86,12 +104,13 @@ training_data <- dataset[indices, ]
 testing_data <- dataset[-indices, ]
 ```
 
-# Exploratory Data Analysis
+The training data set has `r nrow(training_data)` samples and the
+training data set `r nrow(testing_data)`.
+
+# Building the Prediction Model
 
 ```{r}
 ```
-
-# Building the Prediction Model
 
 ```{r}
 model_file <- "model.rds"
