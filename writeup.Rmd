@@ -44,7 +44,8 @@ random seed to ease the reproducibility of the results.
 ```{r results='hide', message=FALSE, warning=FALSE}
 library("readr")
 library("dplyr")
-library("ggplot2")
+library("magrittr")
+library("GGally")
 library("caret")
 library("randomForest")
 library("doMC")
@@ -96,7 +97,7 @@ features in the data set.
 Before continuing, the data set is divided in two parts: 80% of the
 available samples will be used to train the prediction model and the
 remaining 20% for testing. The testing portion of the data set will be
-used to estimate the out-of-sample error of the prediction model.
+used to estimate the out-of-sample accuracy of the prediction model.
 
 ```{r}
 indices <- createDataPartition(dataset$classe, p = 0.8, list = FALSE)
@@ -109,8 +110,32 @@ training data set `r nrow(testing_data)`.
 
 # Building the Prediction Model
 
-```{r}
+An initial exploratory analysis showed that the classes to be
+predicted does not seem linearly separable, and the variable
+distributions depart considerably from the normal distribution. The
+plot shown below illustrates some of these characteristics for a
+sample of the variables corresponding to the Euler angles of the
+dumbbell sensor.
+
+```{r echo=FALSE}
+plot_indices <- createDataPartition(training_data$classe, p = 0.1, list = FALSE)
+plot_data <- select(training_data, classe, roll_dumbbell, pitch_dumbbell, yaw_dumbbell) %>%
+    extract(plot_indices, )
+
+ggpairs(plot_data, columns = 2:ncol(plot_data), colour = "classe",
+        title = "Dumbbell Euler angles",
+        axisLabels = "none",
+        diag = list(continuous = "density"),
+        lower = list(continuous = "points"),
+        upper = list(continuous = "points"))
 ```
+
+Considering these characteristics and the main goal of the accuracy of
+the predictions, I decided to use random forests to build the
+prediction model. The following code fragment builds a random forest
+with 500 trees on the training portion of the data, using 10-fold
+cross validation with accuracy as the evaluation metric to estimate
+the other model parameters (i.e. `mtry`).
 
 ```{r}
 model_file <- "model.rds"
@@ -127,14 +152,35 @@ if (!file.exists(model_file)) {
 }
 ```
 
+The construction of the random forest model took `r round(model$times$everything[3] / 60)`
+minutes using 4 processes on an Intel(R) Core(TM) i5-4200M CPU at 2.50
+GHz with 8 GB of RAM. The selected model was `r round(sum(diag(confusionMatrix(model)$table)), 1)`%
+accurate on the training sample. In the next section, the out-of-sample
+accuracy is estimated on the separate testing portion of the data set.
+
 # Evaluating the Prediction Model
+
+The following code evaluates the performance of the constructed model
+on the testing portion of the data set.
 
 ```{r}
 confusionMatrix(predict(model, newdata = testing_data),
                 testing_data$classe)
 ```
 
+The random forest model obtained an accuracy of
+`r round(sum(diag(confusionMatrix(predict(model, newdata = testing_data), testing_data$classe)$table)) / nrow(testing_data) * 100, 1)`%
+on the testing sample. This value constitutes an estimation of the
+out-of-sample accuracy, given that this sample was not used in any way
+during the construction of the model. Given the high accuracy results,
+it is reasonable to expect that the model will perform well on unseen
+data.
+
 # Submission Results
+
+Finally, the following code generates the predicted values for the
+hold-out sample of the assignment. All the predicted values were
+correct.
 
 ```{r}
 testing_dataset_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
@@ -145,17 +191,14 @@ if (!file.exists(testing_dataset_csv)) {
 
 testing_dataset <- read_csv(testing_dataset_csv) %>%
     select(one_of(c("problem_id", features)))
-```
 
-```{r}
 prediction <- predict(model, newdata = testing_dataset)
-prediction
-```
 
-```{r}
 for (i in seq(along = prediction)) {
     txt_file <- paste0("problem_id_", testing_dataset$problem_id[i], ".txt")
     write.table(prediction[i], file = txt_file,
                 quote = FALSE, row.names = FALSE, col.names = FALSE)
 }
+
+prediction
 ```
