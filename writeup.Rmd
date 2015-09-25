@@ -1,16 +1,16 @@
 ---
-title: "Practical Machine Learning: Prediction Assignment"
+title: "Prediction Assignment"
 author: "Yasser Gonzalez -- http://yassergonzalez.com"
 date: "September 2015"
-output: html_document
+output:
+  html_document:
+    keep_md: true
 ---
 
 # Introduction
 
-The goal of this assignment is to build a prediction model capable of
-identifying if a subject is performing a specific weight lifting
-exercise correctly.
-
+The goal of this assignment is to build a model capable of identifying
+if a subject is performing a specific weight lifting exercise correctly.
 A data set is available with information collected from six subjects
 who were asked to perform 10 repetitions of dumbbell lifts in five
 different settings:
@@ -22,7 +22,7 @@ different settings:
 5.   throwing the hips to the front (class `E`).
 
 The model's input consists of a number of sensors attached to the body
-of the subject: on the belt, forearm, arm, and dumbell. Using this
+of the subject: on the belt, forearm, arm, and dumbbell. Using this
 information, the model must provide a decision about the correctness
 of the exercise execution according to one of the five categories
 specified above.
@@ -38,8 +38,8 @@ following publication:
 
 # Initialization
 
-The following code fragment loads the required R packages and sets the
-random seed to ease the reproducibility of the results.
+The following code loads the required R packages and sets the random
+seed to ease the reproducibility of the results.
 
 ```{r results='hide', message=FALSE, warning=FALSE}
 library("readr")
@@ -70,11 +70,10 @@ In addition to the different readings from the sensors, the data set
 includes a number of engineered features (such as mean and standard
 deviation of the sensor readings computed over a certain sliding time
 window), but for this assignment I have decided to work with the
-original sensor readings and expand the set of features later if
-deemed necessary. Therefore, the selected features correspond to the
-Euler angles (roll, pitch and yaw), and the 3-axis coordinates of the
-accelerometer, gyroscope and magnetometer readings for each one of the
-four sensors.
+original sensor readings. Therefore, the selected features correspond
+to the Euler angles (roll, pitch and yaw), and the 3-axis coordinates
+of the accelerometer, gyroscope and magnetometer readings for each one
+of the four sensors.
 
 ```{r}
 sensors <- c("forearm", "arm", "belt", "dumbbell")
@@ -91,13 +90,12 @@ dataset <- dataset %>%
     mutate(classe = as.factor(classe))
 ```
 
-There are `r nrow(dataset)` observations of the `r length(features)`
-features in the data set.
-
-Before continuing, the data set is divided in two parts: 80% of the
-available samples will be used to train the prediction model and the
-remaining 20% for testing. The testing portion of the data set will be
-used to estimate the out-of-sample accuracy of the prediction model.
+There are `r nrow(dataset)` samples of the `r length(features)`
+features in the data set. Before continuing, the data set is divided
+in two parts: 80% of the available samples will be used to train the
+model and the remaining 20% for testing. The testing portion of the
+data set will be used to estimate the out-of-sample accuracy of the
+model.
 
 ```{r}
 indices <- createDataPartition(dataset$classe, p = 0.8, list = FALSE)
@@ -108,16 +106,15 @@ testing_data <- dataset[-indices, ]
 The training data set has `r nrow(training_data)` samples and the
 training data set `r nrow(testing_data)`.
 
-# Building the Prediction Model
+# Building the Model
 
-An initial exploratory analysis showed that the classes to be
-predicted does not seem linearly separable, and the variable
-distributions depart considerably from the normal distribution. The
-plot shown below illustrates some of these characteristics for a
-sample of the variables corresponding to the Euler angles of the
-dumbbell sensor.
+An initial exploratory analysis showed that the classes does not seem
+linearly separable, and the variable distributions depart considerably
+from the normal distribution. The plot shown below illustrates some of
+these characteristics for a sample of the variables corresponding to
+the Euler angles of the dumbbell sensor.
 
-```{r echo=FALSE}
+```{r dumbbell_euler_angles, fig.path='', echo=FALSE}
 plot_indices <- createDataPartition(training_data$classe, p = 0.1, list = FALSE)
 plot_data <- select(training_data, classe, roll_dumbbell, pitch_dumbbell, yaw_dumbbell) %>%
     extract(plot_indices, )
@@ -130,12 +127,12 @@ ggpairs(plot_data, columns = 2:ncol(plot_data), colour = "classe",
         upper = list(continuous = "points"))
 ```
 
-Considering these characteristics and the main goal of the accuracy of
-the predictions, I decided to use random forests to build the
-prediction model. The following code fragment builds a random forest
-with 500 trees on the training portion of the data, using 10-fold
-cross validation with accuracy as the evaluation metric to estimate
-the other model parameters (i.e. `mtry`).
+Considering these characteristics and the main goal of having accurate
+predictions, I decided to use random forests to build the model. The
+following code fragment builds a random forest with 500 trees on the
+training portion of the data, using 10-fold cross validation with
+accuracy as the evaluation metric to select the other model parameters
+(i.e. `mtry`).
 
 ```{r}
 model_file <- "model.rds"
@@ -152,13 +149,13 @@ if (!file.exists(model_file)) {
 }
 ```
 
-The construction of the random forest model took `r round(model$times$everything[3] / 60)`
-minutes using 4 processes on an Intel(R) Core(TM) i5-4200M CPU at 2.50
-GHz with 8 GB of RAM. The selected model was `r round(sum(diag(confusionMatrix(model)$table)), 1)`%
+The construction of the random forest took `r round(model$times$everything[3] / 60)`
+minutes using 4 processes on an Intel(R) Core(TM) i5-4200M CPU at 2.50 GHz
+with 8 GB of RAM. The final model was `r round(sum(diag(confusionMatrix(model)$table)), 1)`%
 accurate on the training sample. In the next section, the out-of-sample
-accuracy is estimated on the separate testing portion of the data set.
+accuracy is estimated on the testing portion of the data set.
 
-# Evaluating the Prediction Model
+# Evaluating the Model
 
 The following code evaluates the performance of the constructed model
 on the testing portion of the data set.
@@ -168,18 +165,18 @@ confusionMatrix(predict(model, newdata = testing_data),
                 testing_data$classe)
 ```
 
-The random forest model obtained an accuracy of
+The model obtained an accuracy of
 `r round(sum(diag(confusionMatrix(predict(model, newdata = testing_data), testing_data$classe)$table)) / nrow(testing_data) * 100, 1)`%
 on the testing sample. This value constitutes an estimation of the
 out-of-sample accuracy, given that this sample was not used in any way
-during the construction of the model. Given the high accuracy results,
-it is reasonable to expect that the model will perform well on unseen
-data.
+during the construction of the model. Given the highly accurate
+results, it is reasonable to expect that the model will perform well
+on unseen data.
 
 # Submission Results
 
-Finally, the following code generates the predicted values for the
-hold-out sample of the assignment. All the predicted values were
+Finally, the following code computes the predictions for the
+evaluation sample of the assignment. All the predicted values were
 correct.
 
 ```{r}
@@ -192,13 +189,13 @@ if (!file.exists(testing_dataset_csv)) {
 testing_dataset <- read_csv(testing_dataset_csv) %>%
     select(one_of(c("problem_id", features)))
 
-prediction <- predict(model, newdata = testing_dataset)
+results <- predict(model, newdata = testing_dataset)
 
-for (i in seq(along = prediction)) {
+for (i in seq(along = results)) {
     txt_file <- paste0("problem_id_", testing_dataset$problem_id[i], ".txt")
-    write.table(prediction[i], file = txt_file,
+    write.table(results[i], file = txt_file,
                 quote = FALSE, row.names = FALSE, col.names = FALSE)
 }
 
-prediction
+results
 ```
