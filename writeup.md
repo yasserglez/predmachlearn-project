@@ -1,6 +1,7 @@
 # Prediction Assignment
-Yasser Gonzalez -- http://yassergonzalez.com
-September 2015
+
+*Yasser Gonzalez – http://yassergonzalez.com*<br>
+*September 2015*
 
 # Introduction
 
