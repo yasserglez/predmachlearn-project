@@ -1,6 +1,6 @@
 # Prediction Assignment
-Yasser Gonzalez -- http://yassergonzalez.com  
-September 2015  
+Yasser Gonzalez -- http://yassergonzalez.com
+September 2015
 
 # Introduction
 
@@ -113,7 +113,7 @@ from the normal distribution. The plot shown below illustrates some of
 these characteristics for a sample of the variables corresponding to
 the Euler angles of the dumbbell sensor.
 
-![](dumbbell_euler_angles-1.png) 
+![](dumbbell_euler_angles-1.png)
 
 Considering these characteristics and the main goal of having accurate
 predictions, I decided to use random forests to build the model. The
@@ -138,7 +138,7 @@ if (!file.exists(model_file)) {
 }
 ```
 
-The construction of the random forest took 41
+The construction of the random forest took 36
 minutes using 4 processes on an Intel(R) Core(TM) i5-4200M CPU at 2.50 GHz
 with 8 GB of RAM. The final model was 99.5%
 accurate on the training sample. In the next section, the out-of-sample
@@ -157,36 +157,36 @@ confusionMatrix(predict(model, newdata = testing_data),
 
 ```
 ## Confusion Matrix and Statistics
-## 
+##
 ##           Reference
 ## Prediction    A    B    C    D    E
 ##          A 1116    0    0    0    0
-##          B    0  759    3    0    0
-##          C    0    0  679    5    0
+##          B    0  759    2    0    0
+##          C    0    0  680    5    0
 ##          D    0    0    2  638    1
 ##          E    0    0    0    0  720
-## 
+##
 ## Overall Statistics
-##                                          
-##                Accuracy : 0.9972         
-##                  95% CI : (0.995, 0.9986)
-##     No Information Rate : 0.2845         
-##     P-Value [Acc > NIR] : < 2.2e-16      
-##                                          
-##                   Kappa : 0.9965         
-##  Mcnemar's Test P-Value : NA             
-## 
+##
+##                Accuracy : 0.9975
+##                  95% CI : (0.9953, 0.9988)
+##     No Information Rate : 0.2845
+##     P-Value [Acc > NIR] : < 2.2e-16
+##
+##                   Kappa : 0.9968
+##  Mcnemar's Test P-Value : NA
+##
 ## Statistics by Class:
-## 
+##
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            1.0000   1.0000   0.9927   0.9922   0.9986
-## Specificity            1.0000   0.9991   0.9985   0.9991   1.0000
-## Pos Pred Value         1.0000   0.9961   0.9927   0.9953   1.0000
-## Neg Pred Value         1.0000   1.0000   0.9985   0.9985   0.9997
+## Sensitivity            1.0000   1.0000   0.9942   0.9922   0.9986
+## Specificity            1.0000   0.9994   0.9985   0.9991   1.0000
+## Pos Pred Value         1.0000   0.9974   0.9927   0.9953   1.0000
+## Neg Pred Value         1.0000   1.0000   0.9988   0.9985   0.9997
 ## Prevalence             0.2845   0.1935   0.1744   0.1639   0.1838
-## Detection Rate         0.2845   0.1935   0.1731   0.1626   0.1835
-## Detection Prevalence   0.2845   0.1942   0.1744   0.1634   0.1835
-## Balanced Accuracy      1.0000   0.9995   0.9956   0.9957   0.9993
+## Detection Rate         0.2845   0.1935   0.1733   0.1626   0.1835
+## Detection Prevalence   0.2845   0.1940   0.1746   0.1634   0.1835
+## Balanced Accuracy      1.0000   0.9997   0.9963   0.9957   0.9993
 ```
 
 The model obtained an accuracy of
